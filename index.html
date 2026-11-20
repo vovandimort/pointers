@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>C++: вказівники та адреса змінної</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#eef2f7;--card:#fff;--ink:#14213d;--mute:#4b5a75;--line:#cfd8e6;--acc:#0f766e;--accbg:#d9f2ee;--amb:#f2a900;--ambbg:#fff3d1;--bad:#b42318;--ok:#15803d;--code:#14213d;--codefg:#e6edf7;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1626;--card:#16213a;--ink:#e6edf7;--mute:#a3b3cf;--line:#2c3c60;--acc:#2dd4bf;--accbg:#0f3a3a;--amb:#fbbf24;--ambbg:#3a2f0d;--bad:#f87171;--ok:#4ade80;--code:#0a1120;--codefg:#e6edf7;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1626;--card:#16213a;--ink:#e6edf7;--mute:#a3b3cf;--line:#2c3c60;--acc:#2dd4bf;--accbg:#0f3a3a;--amb:#fbbf24;--ambbg:#3a2f0d;--bad:#f87171;--ok:#4ade80;--code:#0a1120;--codefg:#e6edf7;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:16px 16px 56px}
+header{padding:20px 0 8px}
+h1{font-size:clamp(1.65rem,7vw,2.3rem);line-height:1.15;margin:0 0 10px;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 14px}
+nav{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+nav a{flex:none;min-height:44px;display:inline-flex;align-items:center;padding:0 14px;border:1.5px solid var(--line);border-radius:22px;color:var(--ink);text-decoration:none;font-size:.9rem;background:var(--card)}
+nav a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--amb);outline-offset:2px}
+section{margin-top:34px;padding-top:6px}
+h2{font-size:1.4rem;line-height:1.25;margin:0 0 12px;padding-left:12px;border-left:6px solid var(--amb)}
+p{margin:0 0 12px}
+.goal{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px}
+.goal ul{margin:6px 0 0;padding-left:20px}
+code,pre,.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+code{background:var(--accbg);padding:1px 6px;border-radius:5px;font-size:.88em}
+pre{background:var(--code);color:var(--codefg);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.86rem;line-height:1.55;margin:0 0 14px;-webkit-overflow-scrolling:touch}
+pre code{background:none;padding:0;font-size:inherit}
+pre .l{display:block;padding:0 6px;margin:0 -6px;border-radius:4px;white-space:pre}
+pre .l.cur{background:rgba(242,169,0,.28)}
+.lab{font-weight:600;font-size:.95rem;margin:0 0 6px;color:var(--mute)}
+.ram{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin:0 0 12px}
+.cell{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:8px;padding:0;min-height:88px;display:flex;flex-direction:column;text-align:center;cursor:pointer;overflow:hidden}
+button.cell{-webkit-appearance:none;appearance:none}
+.cell .ad{font-family:"IBM Plex Mono",monospace;font-size:.72rem;background:var(--accbg);color:var(--ink);padding:3px 4px;border-bottom:2px solid var(--line)}
+.cell .nm{font-family:"IBM Plex Mono",monospace;font-size:.85rem;color:var(--mute);padding-top:6px}
+.cell .vl{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:1.25rem;padding:0 4px 8px}
+.cell.sel{border-color:var(--acc);box-shadow:0 0 0 3px var(--accbg)}
+.cell.tgt{border-color:var(--amb);box-shadow:0 0 0 3px var(--ambbg)}
+.cell.gone{opacity:.35;border-style:dashed}
+.cell.ptr .vl{color:var(--acc);font-size:1.05rem;padding-top:3px}
+.info,.log{background:var(--ambbg);border-radius:10px;padding:10px 14px;margin:0 0 12px;min-height:3.4em}
+.log.err{background:transparent;border:2px solid var(--bad);color:var(--bad)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.btn{font:600 .95rem/1.2 "IBM Plex Mono",ui-monospace,monospace;min-height:48px;padding:10px 14px;border-radius:10px;border:2px solid var(--acc);background:var(--card);color:var(--ink);cursor:pointer;flex:1 1 auto;touch-action:manipulation}
+.btn.pri{background:var(--acc);color:var(--bg)}
+.btn[aria-pressed="true"]{background:var(--acc);color:var(--bg)}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cap{font-size:.85rem;color:var(--mute);margin:8px 0 4px}
+.msg{min-height:3.6em;margin:10px 0}
+.bad{color:var(--bad);font-weight:600}.good{color:var(--ok);font-weight:600}
+.q{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px;margin:0 0 12px}
+.q h3{font-size:1rem;margin:0 0 10px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;font:inherit;font-size:.95rem;color:var(--ink);background:transparent;border:2px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 8px;min-height:48px;cursor:pointer;touch-action:manipulation}
+.opt.ok{border-color:var(--ok);background:var(--accbg)}.opt.no{border-color:var(--bad)}
+.exp{font-size:.92rem;color:var(--mute);margin:4px 0 0}
+details{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:0 14px;margin:0 0 10px}
+summary{min-height:48px;display:flex;align-items:center;font-weight:600;cursor:pointer}
+details[open] summary{border-bottom:1.5px solid var(--line);margin-bottom:12px}
+details > :last-child{margin-bottom:14px}
+.score{font-weight:700;font-size:1.05rem}
+@media (min-width:600px){body{font-size:18px}.btn{flex:0 0 auto}.cell{min-height:96px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Вказівники в C++: адреса змінної та передача параметрів</h1>
+<p class="sub">Інтерактивний урок · 10 клас, профіль STEM · ~40 хв</p>
+<nav aria-label="Розділи уроку">
+<a href="#s1">1. Адреса</a><a href="#s2">2. Вказівник</a><a href="#s3">3. Параметри</a><a href="#s4">4. Тест</a><a href="#s5">5. Практика</a>
+</nav>
+<div class="goal"><b>Після уроку ти зможеш:</b>
+<ul><li>пояснити, що таке адреса змінної та як її отримати (<code>&amp;</code>);</li>
+<li>оголосити вказівник і працювати зі значенням через <code>*</code>;</li>
+<li>написати функцію, яка змінює змінні викликача.</li></ul></div>
+</header>
+
+<section id="s1">
+<h2>1. Де живе змінна?</h2>
+<p>Пам’ять комп’ютера — це послідовність байтів, кожен має свій номер: <b>адресу</b>. Коли ти пишеш <code>int a = 5;</code>, компілятор відводить для <code>a</code> 4 байти й запам’ятовує, з якої адреси вони починаються.</p>
+<p class="lab">Торкнись комірки, щоб побачити її адресу:</p>
+<div class="ram" id="ram1"></div>
+<div class="info" id="info1" aria-live="polite">Обери змінну.</div>
+<pre><code>int a = 5;
+cout &lt;&lt; a;   // 5       — значення
+cout &lt;&lt; &amp;a;  // 0x1000  — адреса (оператор &amp;)</code></pre>
+<p><b>Оператор <code>&amp;</code></b> перед змінною повертає її адресу. Справжні адреси інші й змінюються між запусками — тут вони спрощені.</p>
+</section>
+
+<section id="s2">
+<h2>2. Вказівник — змінна для адреси</h2>
+<p><b>Вказівник</b> — змінна, яка зберігає не число, а <i>адресу</i> іншої змінної. Оператор <code>*</code> «переходить за адресою» й дає доступ до значення там.</p>
+<pre><code>int a = 5, b = 8;
+int* p = nullptr;  // нікуди не вказує
+p = &amp;a;            // p зберігає адресу a
+*p = 20;           // змінює a через p</code></pre>
+<p class="lab">Експеримент: виконуй команди й дивись на пам’ять.</p>
+<div class="ram" id="ram2"></div>
+<div class="btns">
+<button class="btn" data-a="pa">p = &amp;a;</button>
+<button class="btn" data-a="pb">p = &amp;b;</button>
+<button class="btn" data-a="inc">*p += 1;</button>
+<button class="btn" data-a="mul">*p *= 2;</button>
+<button class="btn" data-a="a10">a += 10;</button>
+<button class="btn" data-a="rst">Скинути</button>
+</div>
+<div class="log" id="log2" aria-live="polite">Спробуй <code>*p += 1;</code> одразу, поки <code>p</code> не вказує ні на що.</div>
+<p><b>Запам’ятай:</b> <code>&amp;x</code> — «адреса x»; <code>*p</code> — «значення за адресою в p». Розіменування <code>nullptr</code> — помилка виконання.</p>
+</section>
+
+<section id="s3">
+<h2>3. Передача параметрів: значення чи вказівник</h2>
+<p>За замовчуванням функція отримує <b>копії</b> аргументів. Щоб змінити змінну викликача, передаємо її <b>адресу</b> і працюємо через <code>*</code>. Перевір на задачі swap (обмін значень <code>a</code> і <code>b</code>).</p>
+<div class="row" role="group" aria-label="Спосіб передачі">
+<button class="btn" id="mv" aria-pressed="true">За значенням</button>
+<button class="btn" id="mp" aria-pressed="false">За вказівником</button>
+</div>
+<pre id="code3" style="margin-top:12px" aria-label="Код"></pre>
+<p class="cap">main</p><div class="ram" id="main3"></div>
+<p class="cap">swap (локальні змінні функції)</p><div class="ram" id="fn3"></div>
+<div class="msg" id="msg3" aria-live="polite"></div>
+<div class="row">
+<button class="btn" id="prev3">← Назад</button>
+<button class="btn pri" id="next3">Крок →</button>
+</div>
+<p class="cap" id="cnt3"></p>
+<p><b>Чому так?</b> У першому варіанті <code>x</code> і <code>y</code> — окремі комірки з копіями. У другому <code>px</code> і <code>py</code> зберігають адреси <code>a</code> і <code>b</code>, тому <code>*px</code> — це сама <code>a</code>.</p>
+<pre><code>void swap(int* px, int* py);
+int a = 5, b = 8;
+swap(&amp;a, &amp;b);   // передаємо адреси</code></pre>
+</section>
+
+<section id="s4">
+<h2>4. Перевір себе</h2>
+<div id="quiz"></div>
+<p class="score" id="score" aria-live="polite"></p>
+</section>
+
+<section id="s5">
+<h2>5. Практика</h2>
+<details><summary>Задача 1. Подвоєння</summary>
+<p>Напиши <code>void twice(int* p)</code>, яка подвоює значення змінної. Виклик: <code>int k = 4; twice(&amp;k);</code> → <code>k == 8</code>.</p>
+<pre><code>void twice(int* p) {
+    *p = *p * 2;
+}</code></pre></details>
+<details><summary>Задача 2. Мінімум і максимум</summary>
+<p>Напиши <code>void minmax(int x, int y, int* mn, int* mx)</code>, яка записує менше число в <code>*mn</code>, більше — в <code>*mx</code>. Виклик: <code>minmax(7, 3, &amp;lo, &amp;hi);</code></p>
+<pre><code>void minmax(int x, int y, int* mn, int* mx) {
+    if (x &lt; y) { *mn = x; *mx = y; }
+    else       { *mn = y; *mx = x; }
+}</code></pre></details>
+<details><summary>Задача 3. Що виведе програма?</summary>
+<pre><code>int x = 1, y = 2;
+int* p = &amp;x;
+int* q = &amp;y;
+*p = *q + 5;
+q = p;
+*q = *q * 2;
+cout &lt;&lt; x &lt;&lt; " " &lt;&lt; y;</code></pre>
+<p>Спробуй намалювати комірки на папері, потім відкрий відповідь.</p>
+<p><b>Відповідь: 14 2.</b> Спочатку <code>x = 2 + 5 = 7</code>. Потім <code>q</code> вказує на <code>x</code>, тож <code>*q * 2</code> дає <code>x = 14</code>; <code>y</code> не змінювалась.</p></details>
+<p><b>Підсумок.</b> <code>&amp;x</code> — адреса; <code>int* p</code> — змінна для адреси; <code>*p</code> — доступ до значення; параметр-вказівник дозволяє функції змінити змінну викликача.</p>
+</section>
+</div>
+
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+function cell(nm,val,ad,cls){return '<div class="cell '+(cls||"")+'">'+(ad?'<span class="ad">'+ad+'</span>':'')+'<span class="nm">'+esc(nm)+'</span><span class="vl">'+esc(val)+'</span></div>'}
+var AD={a:"0x1000",b:"0x1004",c:"0x1008"};
+
+/* 1 */
+var V1={a:5,b:8,c:42};
+function r1(sel){
+  $("#ram1").innerHTML=Object.keys(V1).map(function(k){return '<button class="cell'+(sel===k?' sel':'')+'" data-k="'+k+'"><span class="ad">'+AD[k]+'</span><span class="nm">'+k+'</span><span class="vl">'+V1[k]+'</span></button>'}).join("");
+}
+$("#ram1").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;var k=b.dataset.k;r1(k);
+  $("#info1").innerHTML='<code>&amp;'+k+'</code> = <b>'+AD[k]+'</b> · значення <code>'+k+'</code> = '+V1[k]+' · займає 4 байти, тому наступна змінна починається з +4.';
+});
+r1();
+
+/* 2 */
+var S;function reset2(){S={a:5,b:8,p:null}}reset2();
+function r2(){
+  $("#ram2").innerHTML=cell("int a",S.a,AD.a,S.p==="a"?"tgt":"")+cell("int b",S.b,AD.b,S.p==="b"?"tgt":"")+cell("int* p",S.p?AD[S.p]:"nullptr","0x1008","ptr");
+}
+function log2(h,err){var l=$("#log2");l.className="log"+(err?" err":"");l.innerHTML=h}
+$(".btns").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;var a=b.dataset.a;
+  if(a==="rst"){reset2();r2();log2("Пам’ять скинуто.");return}
+  if(a==="pa"||a==="pb"){var t=a==="pa"?"a":"b";S.p=t;r2();log2("<code>p = &amp;"+t+";</code> Тепер <code>p</code> зберігає адресу <b>"+AD[t]+"</b> — вказує на <code>"+t+"</code>.");return}
+  if(a==="a10"){S.a+=10;r2();log2("<code>a += 10;</code> Тепер <code>a = "+S.a+"</code>."+(S.p==="a"?" І <code>*p</code> теж "+S.a+" — це та сама комірка.":""));return}
+  if(!S.p){log2("<b>Помилка!</b> <code>p</code> = nullptr, за цією адресою немає змінної. Спочатку присвой <code>p = &amp;a;</code> або <code>p = &amp;b;</code>.",true);return}
+  if(a==="inc"){S[S.p]+=1;r2();log2("<code>*p += 1;</code> Змінилась <code>"+S.p+"</code>: тепер <b>"+S[S.p]+"</b>.")}
+  if(a==="mul"){S[S.p]*=2;r2();log2("<code>*p *= 2;</code> Змінилась <code>"+S.p+"</code>: тепер <b>"+S[S.p]+"</b>.")}
+});
+r2();
+
+/* 3 */
+var CODE={
+ v:["void swap(int x, int y) {","  int tmp = x;","  x = y;","  y = tmp;","}","// у main: int a = 5, b = 8;","swap(a, b);"],
+ p:["void swap(int* px, int* py) {","  int tmp = *px;","  *px = *py;","  *py = tmp;","}","// у main: int a = 5, b = 8;","swap(&a, &b);"]
+};
+var ST={
+ v:[
+  {a:5,b:8,f:null,l:5,m:"Початок: <code>a = 5</code>, <code>b = 8</code>."},
+  {a:5,b:8,f:[["x",5],["y",8],["tmp","?"]],l:6,m:"Виклик: <code>x</code> і <code>y</code> — <b>копії</b> значень у нових комірках."},
+  {a:5,b:8,f:[["x",5],["y",8],["tmp",5]],l:1,m:"<code>tmp</code> запам’ятав 5."},
+  {a:5,b:8,f:[["x",8],["y",8],["tmp",5]],l:2,m:"<code>x</code> став 8. Зверни увагу: <code>a</code> лишилась 5."},
+  {a:5,b:8,f:[["x",8],["y",5],["tmp",5]],l:3,m:"У копіях обмін відбувся: <code>x = 8</code>, <code>y = 5</code>."},
+  {a:5,b:8,f:null,l:4,m:'Функція завершилась, копії зникли. <span class="bad">a = 5, b = 8 — обміну не сталося.</span>'}],
+ p:[
+  {a:5,b:8,f:null,l:5,m:"Початок: <code>a = 5</code>, <code>b = 8</code>."},
+  {a:5,b:8,f:[["px","0x1000"],["py","0x1004"],["tmp","?"]],l:6,m:"Виклик: передаємо <b>адреси</b>. <code>px</code> вказує на <code>a</code>, <code>py</code> — на <code>b</code>."},
+  {a:5,b:8,f:[["px","0x1000"],["py","0x1004"],["tmp",5]],l:1,m:"<code>*px</code> — це значення за адресою 0x1000, тобто <code>a</code>. <code>tmp = 5</code>."},
+  {a:8,b:8,f:[["px","0x1000"],["py","0x1004"],["tmp",5]],l:2,m:"<code>*px = *py</code> записує 8 <b>прямо в a</b>."},
+  {a:8,b:5,f:[["px","0x1000"],["py","0x1004"],["tmp",5]],l:3,m:"<code>*py = tmp</code> записує 5 у <code>b</code>."},
+  {a:8,b:5,f:null,l:4,m:'Функція завершилась, а зміни лишились. <span class="good">a = 8, b = 5 — обмін вдався.</span>'}]
+};
+var mode="v",step=0;
+function r3(){
+  var s=ST[mode][step];
+  $("#code3").innerHTML=CODE[mode].map(function(t,i){return '<span class="l'+(i===s.l?' cur':'')+'">'+esc(t)+'</span>'}).join("");
+  $("#main3").innerHTML=cell("int a",s.a,"0x1000")+cell("int b",s.b,"0x1004");
+  $("#fn3").innerHTML=s.f?s.f.map(function(x){return cell((mode==="p"&&x[0]!=="tmp"?"int* ":"int ")+x[0],x[1],"",mode==="p"&&x[0]!=="tmp"?"ptr":"")}).join(""):cell("—","немає","","gone");
+  $("#msg3").innerHTML=s.m;
+  $("#prev3").disabled=step===0;$("#next3").disabled=step===ST[mode].length-1;
+  $("#cnt3").textContent="Крок "+(step+1)+" з "+ST[mode].length;
+}
+function setMode(m){mode=m;step=0;$("#mv").setAttribute("aria-pressed",m==="v");$("#mp").setAttribute("aria-pressed",m==="p");r3()}
+$("#mv").onclick=function(){setMode("v")};$("#mp").onclick=function(){setMode("p")};
+$("#prev3").onclick=function(){if(step>0){step--;r3()}};
+$("#next3").onclick=function(){if(step<ST[mode].length-1){step++;r3()}};
+r3();
+
+/* 4 */
+var Q=[
+ {q:"Що дає вираз &a, де a — змінна типу int?",o:["Значення змінної a","Адресу змінної a","Розмір змінної a","Вказівник на nullptr"],c:1,e:"Оператор & повертає адресу змінної в пам’яті."},
+ {q:"int x = 7; int* p = &x; *p = 3; Чому дорівнює x?",o:["7","3","Адресі x","Програма не скомпілюється"],c:1,e:"*p — це сама x, тож запис через *p змінює x."},
+ {q:"Чому swap(int a, int b) не міняє змінні в main?",o:["Функція не має return","Вона працює з копіями значень","Імена збігаються","Потрібен тип double"],c:1,e:"Параметри за значенням — окремі комірки з копіями; після виходу з функції вони зникають."},
+ {q:"Як правильно викликати void inc(int* n) для змінної k?",o:["inc(k);","inc(*k);","inc(&k);","inc(&&k);"],c:2,e:"Функція очікує адресу, тому передаємо &k."},
+ {q:"Що станеться при *p = 5;, якщо int* p = nullptr;?",o:["x стане 5","Помилка виконання: адреси немає","p стане 5","Нічого не станеться"],c:1,e:"nullptr нікуди не вказує; розіменування призводить до аварії (невизначена поведінка)."}
+];
+var done={},right=0;
+$("#quiz").innerHTML=Q.map(function(x,i){return '<div class="q" data-i="'+i+'"><h3>'+(i+1)+'. '+esc(x.q)+'</h3>'+x.o.map(function(o,j){return '<button class="opt" data-j="'+j+'">'+esc(o)+'</button>'}).join("")+'<p class="exp" hidden></p></div>'}).join("");
+$("#quiz").addEventListener("click",function(e){
+  var b=e.target.closest(".opt");if(!b)return;
+  var box=b.closest(".q"),i=+box.dataset.i,j=+b.dataset.j;if(done[i])return;done[i]=1;
+  var ok=j===Q[i].c;if(ok)right++;
+  b.classList.add(ok?"ok":"no");
+  if(!ok)box.querySelector('[data-j="'+Q[i].c+'"]').classList.add("ok");
+  var ex=box.querySelector(".exp");ex.hidden=false;ex.textContent=(ok?"Вірно. ":"Не зовсім. ")+Q[i].e;
+  var n=Object.keys(done).length;
+  $("#score").textContent=n<Q.length?"Відповіли: "+n+" з "+Q.length:"Результат: "+right+" з "+Q.length+(right===Q.length?" — відмінно!":right>=3?" — добре, перегляньте пояснення до помилок.":" — поверніться до розділів 2 і 3 й спробуйте ще раз.");
+});
+})();
+</script>
+</body>
+</html>
